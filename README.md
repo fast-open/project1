@@ -2,6 +2,23 @@
 
 This repository contains a static snapshot clone of `http://www.dasoftn.in` generated from the site's WordPress sitemap.
 
+## Important repository note
+
+Some PR platforms reject binary files in diffs. To keep PRs compatible, this repository stores a **text-only snapshot** (HTML/CSS/JS/SVG) and excludes binary assets from source control.
+
+## PDF self-hosting strategy (Option A)
+
+To make the deployed site less dependent on the original host while keeping this repo PR-friendly:
+
+- During **GitHub Pages deployment**, workflow step `python3 scripts/fetch_pdfs.py` scans mirrored HTML files.
+- It finds `http://www.dasoftn.in/wp-content/uploads/...pdf` links, downloads those PDFs into:
+  - `cloned-site/www.dasoftn.in/mirror-pdfs/wp-content/uploads/...`
+- It rewrites the HTML links to point to the local mirrored PDF files.
+
+So:
+- PDFs are **binary** (yes), but they are generated in deployment output, not committed via PR.
+- The live GitHub Pages site serves those mirrored PDFs from your deployed artifact.
+
 ## Feasibility
 
 ### Can this be hosted free on Vercel long-term?
@@ -26,8 +43,9 @@ This repo includes a Pages workflow at `.github/workflows/deploy-pages.yml` that
 
 ## Files
 
-- `cloned-site/www.dasoftn.in/`: generated static website files (text-only snapshot for PR compatibility).
-- `scripts/mirror_site.sh`: reruns sitemap discovery + mirroring, then removes binary assets.
+- `cloned-site/www.dasoftn.in/`: generated static website files (text-only in repo).
+- `scripts/mirror_site.sh`: reruns sitemap discovery + mirroring, then removes binary assets from tracked files.
+- `scripts/fetch_pdfs.py`: deployment-time PDF downloader + link rewriter.
 - `scripts/urls.txt`: URL list extracted from sitemap for the latest run.
 - `.github/workflows/deploy-pages.yml`: GitHub Actions workflow for GitHub Pages deployment.
 
